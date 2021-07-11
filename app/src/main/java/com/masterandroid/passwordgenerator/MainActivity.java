@@ -2,6 +2,9 @@ package com.masterandroid.passwordgenerator;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,6 +14,8 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     Button buttonGenPass;
@@ -25,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_main);
         buttonGenPass = findViewById(R.id.button_generate_password);
         password = findViewById(R.id.textPassGenerated);
+        buttonCpyClip = findViewById(R.id.button_copy_clipboard);
 
         spinnerNumber = (Spinner) findViewById(R.id.spinnerNumber);
         ArrayAdapter<CharSequence> adapter =
@@ -38,17 +44,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         buttonGenPass.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                char [] parola = new char[number];
-                for( int i = 0;i < number ;i++) {
-                    parola [i] = (char)(65+i);
-                }
-                String txt = "";
-                for(int i = 0 ;i<number ;i++)
-                    txt = txt + parola[i];
-                password.setText(txt);
+                password.setText(generatePass(number));
             }
         });
-
+        buttonCpyClip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String cpy = password.getText().toString();
+                ClipboardManager clipboardManager =
+                        (ClipboardManager)
+                                getSystemService
+                                (Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("Label", cpy);
+                clipboardManager.setPrimaryClip(clip);
+            }
+        });
     }
 
 
@@ -62,5 +72,31 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
+    }
+    public String generatePass(int nr){
+        Random rand = new Random();
+        char [] parola = new char[nr];
+        boolean ok = true;
+        for(int i=0 ; i < nr; i++){
+            if(ok == false){
+                ok = true;
+                parola[i] = Character.forDigit(rand.nextInt(9),10);
+                Log.i("nomer",String.valueOf(parola[i]));
+            }
+            else
+                if(ok == true)
+            {
+                ok = false;
+                parola[i] = (char)(rand.nextInt(53) + 72);
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        for(char c:parola)
+        {
+            sb.append(c);
+        }
+        String txt = sb.toString();
+        Log.i("Aicie",txt);
+        return txt;
     }
 }
